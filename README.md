@@ -1,4 +1,3 @@
-```markdown
 # Sistema de Gestão de Clientes
 
 Sistema de cadastro e gerenciamento de clientes desenvolvido em Java, com menu interativo via terminal e persistência de dados em banco MySQL.
@@ -42,21 +41,25 @@ CREATE TABLE clientes (
 ## Como executar
 
 1. Clone o repositório:
+
 ```
 git clone https://github.com/lucasbrl95/sistema-clientes.git
 ```
 
 2. Abra `src/ConexaoDB.java` e informe sua senha do MySQL:
+
 ```java
 private static final String PASSWORD = "sua_senha_aqui";
 ```
 
 3. Acesse a pasta `src` e compile:
+
 ```
 javac -cp ".;../mysql-connector-j-26.7.0.jar" *.java
 ```
 
 4. Execute:
+
 ```
 java -cp ".;../mysql-connector-j-26.7.0.jar" Main
 ```
@@ -64,4 +67,3 @@ java -cp ".;../mysql-connector-j-26.7.0.jar" Main
 ## Autor
 
 Lucas — Desenvolvedor Back-end | Goiânia, BR | [GitHub](https://github.com/lucasbrl95)
-```
