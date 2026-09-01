@@ -1,10 +1,13 @@
-import java.util.ArrayList;
+import java.sql.*;
 import java.util.Scanner;
 
 public class SistemaClientes {
-    private ArrayList<Cliente> clientes = new ArrayList<>();
+    private Connection conn;
     private Scanner scanner = new Scanner(System.in);
-    private int proximoId = 1;
+
+    public SistemaClientes(Connection conn) {
+        this.conn = conn;
+    }
 
     public void menu() {
         int opcao;
@@ -13,6 +16,7 @@ public class SistemaClientes {
             System.out.println("1 - Cadastrar cliente");
             System.out.println("2 - Listar clientes");
             System.out.println("3 - Buscar por nome");
+            System.out.println("4 - Excluir cliente");
             System.out.println("0 - Sair");
             System.out.print("Escolha: ");
             opcao = scanner.nextInt();
@@ -22,7 +26,8 @@ public class SistemaClientes {
                 case 1 -> cadastrar();
                 case 2 -> listar();
                 case 3 -> buscar();
-                case 0 -> System.out.println("Encerrando sistema...");
+                case 4 -> excluir();
+                case 0 -> System.out.println("Encerrando...");
                 default -> System.out.println("Opção inválida.");
             }
         } while (opcao != 0);
@@ -36,31 +41,71 @@ public class SistemaClientes {
         System.out.print("Telefone: ");
         String telefone = scanner.nextLine();
 
-        clientes.add(new Cliente(proximoId++, nome, email, telefone));
-        System.out.println("Cliente cadastrado com sucesso!");
+        String sql = "INSERT INTO clientes (nome, email, telefone) VALUES (?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nome);
+            ps.setString(2, email);
+            ps.setString(3, telefone);
+            ps.executeUpdate();
+            System.out.println("Cliente cadastrado com sucesso!");
+        } catch (SQLException e) {
+            System.out.println("Erro ao cadastrar: " + e.getMessage());
+        }
     }
 
     private void listar() {
-        if (clientes.isEmpty()) {
-            System.out.println("Nenhum cliente cadastrado.");
-            return;
-        }
-        System.out.println("\n--- Clientes ---");
-        for (Cliente c : clientes) {
-            c.exibir();
+        String sql = "SELECT * FROM clientes";
+        try (Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            System.out.println("\n--- Clientes ---");
+            boolean vazio = true;
+            while (rs.next()) {
+                vazio = false;
+                System.out.println("ID: " + rs.getInt("id"));
+                System.out.println("Nome: " + rs.getString("nome"));
+                System.out.println("Email: " + rs.getString("email"));
+                System.out.println("Telefone: " + rs.getString("telefone"));
+                System.out.println("----------------------------");
+            }
+            if (vazio) System.out.println("Nenhum cliente cadastrado.");
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar: " + e.getMessage());
         }
     }
 
     private void buscar() {
         System.out.print("Digite o nome: ");
-        String nome = scanner.nextLine().toLowerCase();
-        boolean encontrou = false;
-        for (Cliente c : clientes) {
-            if (c.getNome().toLowerCase().contains(nome)) {
-                c.exibir();
+        String nome = scanner.nextLine();
+        String sql = "SELECT * FROM clientes WHERE nome LIKE ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + nome + "%");
+            ResultSet rs = ps.executeQuery();
+            boolean encontrou = false;
+            while (rs.next()) {
                 encontrou = true;
+                System.out.println("ID: " + rs.getInt("id"));
+                System.out.println("Nome: " + rs.getString("nome"));
+                System.out.println("Email: " + rs.getString("email"));
+                System.out.println("Telefone: " + rs.getString("telefone"));
+                System.out.println("----------------------------");
             }
+            if (!encontrou) System.out.println("Nenhum cliente encontrado.");
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar: " + e.getMessage());
         }
-        if (!encontrou) System.out.println("Nenhum cliente encontrado.");
+    }
+
+    private void excluir() {
+        System.out.print("ID do cliente a excluir: ");
+        int id = scanner.nextInt();
+        String sql = "DELETE FROM clientes WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            int linhas = ps.executeUpdate();
+            if (linhas > 0) System.out.println("Cliente excluído!");
+            else System.out.println("ID não encontrado.");
+        } catch (SQLException e) {
+            System.out.println("Erro ao excluir: " + e.getMessage());
+        }
     }
 }
