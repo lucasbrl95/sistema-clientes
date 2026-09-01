@@ -10,28 +10,30 @@ public class SistemaClientes {
     }
 
     public void menu() {
-        int opcao;
-        do {
-            System.out.println("\n=== Sistema de Gestão de Clientes ===");
-            System.out.println("1 - Cadastrar cliente");
-            System.out.println("2 - Listar clientes");
-            System.out.println("3 - Buscar por nome");
-            System.out.println("4 - Excluir cliente");
-            System.out.println("0 - Sair");
-            System.out.print("Escolha: ");
-            opcao = scanner.nextInt();
-            scanner.nextLine();
+    int opcao;
+    do {
+        System.out.println("\n=== Sistema de Gestão de Clientes ===");
+        System.out.println("1 - Cadastrar cliente");
+        System.out.println("2 - Listar clientes");
+        System.out.println("3 - Buscar por nome");
+        System.out.println("4 - Excluir cliente");
+        System.out.println("5 - Atualizar cliente");
+        System.out.println("0 - Sair");
+        System.out.print("Escolha: ");
+        opcao = scanner.nextInt();
+        scanner.nextLine();
 
-            switch (opcao) {
-                case 1 -> cadastrar();
-                case 2 -> listar();
-                case 3 -> buscar();
-                case 4 -> excluir();
-                case 0 -> System.out.println("Encerrando...");
-                default -> System.out.println("Opção inválida.");
-            }
-        } while (opcao != 0);
-    }
+        switch (opcao) {
+            case 1 -> cadastrar();
+            case 2 -> listar();
+            case 3 -> buscar();
+            case 4 -> excluir();
+            case 5 -> atualizar();
+            case 0 -> System.out.println("Encerrando...");
+            default -> System.out.println("Opção inválida.");
+        }
+    } while (opcao != 0);
+}
 
     private void cadastrar() {
         System.out.print("Nome: ");
@@ -108,4 +110,30 @@ public class SistemaClientes {
             System.out.println("Erro ao excluir: " + e.getMessage());
         }
     }
+
+    private void atualizar() {
+    System.out.print("ID do cliente a atualizar: ");
+    int id = scanner.nextInt();
+    scanner.nextLine();
+
+    System.out.print("Novo nome: ");
+    String nome = scanner.nextLine();
+    System.out.print("Novo email: ");
+    String email = scanner.nextLine();
+    System.out.print("Novo telefone: ");
+    String telefone = scanner.nextLine();
+
+    String sql = "UPDATE clientes SET nome = ?, email = ?, telefone = ? WHERE id = ?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, nome);
+        ps.setString(2, email);
+        ps.setString(3, telefone);
+        ps.setInt(4, id);
+        int linhas = ps.executeUpdate();
+        if (linhas > 0) System.out.println("Cliente atualizado com sucesso!");
+        else System.out.println("ID não encontrado.");
+    } catch (SQLException e) {
+        System.out.println("Erro ao atualizar: " + e.getMessage());
+    }
+}
 }
